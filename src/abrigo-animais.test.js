@@ -29,3 +29,54 @@ describe('Abrigo de Animais', () => {
       expect(resultado.erro).toBeFalsy();
   });
 });
+
+describe('Abrigo de Animais - Casos Adicionais', () => {
+
+  test('Deve rejeitar brinquedo inválido', () => {
+    const resultado = new AbrigoAnimais().encontraPessoas('RATO,BOLINHA', 'RATO,BOLA', 'Rex');
+    expect(resultado.erro).toBe('Brinquedo inválido');
+    expect(resultado.lista).toBeFalsy();
+  });
+
+  test('Loco não é adotado sem companhia', () => {
+    const resultado = new AbrigoAnimais().encontraPessoas('SKATE,RATO', 'SKATE,RATO', 'Loco');
+    expect(resultado.lista).toEqual(['Loco - abrigo']);
+  });
+
+  test('Loco é adotado quando há companhia', () => {
+    const resultado = new AbrigoAnimais().encontraPessoas('RATO,BOLA', 'SKATE,RATO', 'Rex,Loco');
+
+    const locoAdotado = resultado.lista.find(l => l.startsWith('Loco'));
+    expect(['Loco - pessoa 1', 'Loco - pessoa 2']).toContain(locoAdotado);
+  });
+
+  test('Pessoa não pode adotar mais de 3 animais', () => {
+    const resultado = new AbrigoAnimais().encontraPessoas(
+      'RATO,BOLA,LASER,CAIXA,NOVELO',
+      'RATO,BOLA,LASER,CAIXA,NOVELO',
+      'Rex,Bola,Bebe,Mimi,Fofo'
+    );
+
+    const adotados1 = resultado.lista.filter(l => l.includes('pessoa 1'));
+    const adotados2 = resultado.lista.filter(l => l.includes('pessoa 2'));
+
+    expect(adotados1.length).toBeLessThanOrEqual(3);
+    expect(adotados2.length).toBeLessThanOrEqual(3);
+  });
+
+  test('Empate entre pessoas deixa animal no abrigo', () => {
+    const resultado = new AbrigoAnimais().encontraPessoas('RATO,BOLA', 'RATO,BOLA', 'Rex');
+    expect(resultado.lista).toEqual(['Rex - abrigo']);
+  });
+
+  test('Brinquedos duplicados são rejeitados', () => {
+    const resultado = new AbrigoAnimais().encontraPessoas('RATO,RATO,BOLA', 'RATO,BOLA', 'Rex');
+    expect(resultado.erro).toBe('Brinquedo inválido');
+  });
+
+  test('Animais duplicados na lista são rejeitados', () => {
+    const resultado = new AbrigoAnimais().encontraPessoas('RATO,BOLA', 'RATO,BOLA', 'Rex,Rex');
+    expect(resultado.erro).toBe('Animal inválido');
+  });
+
+});
